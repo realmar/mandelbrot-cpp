@@ -1,0 +1,2 @@
+# To compile under windows with TDM-GCC-64
+g++  .\main.cpp -I"C:\TDM-GCC-64\include"  -m32 -lglu32 -lopengl32 -lfreeglut
