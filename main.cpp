@@ -4,6 +4,8 @@
 #include <complex>
 #include <iostream>
 
+#include <cmath>
+
 // window
 const unsigned int W = 100;
 const unsigned int H = 100;
@@ -25,7 +27,9 @@ pixel_y := map to -1, 1         // imaginary part of c
 */
 
 long double mapPixel(const unsigned int& pixel, const long double* range, const unsigned int& old_max) {
-  return (((pixel - 0) * (range[1] - range[0])) / (old_max - 0)) + 0;
+  return abs((((old_max / 100) * pixel) / 100) * (range[0] - range[1])) + range[0];
+
+  // return (((pixel - 0) * (range[1] - range[0])) / (old_max - 0)) + 0;
 }
 
 float* generateMandelBrot() {
@@ -44,7 +48,7 @@ float* generateMandelBrot() {
 
     std::complex<long double> last_z = 0.0;
     unsigned int iteration = 0;
-    while(last_z.real() <= 4.0L && last_z.imag() <= 4.0L && iteration <= MAX_ITERATIONS) {
+    while(last_z.real() <= 2.0L && last_z.imag() <= 2.0L && iteration <= MAX_ITERATIONS) {
       last_z = last_z * last_z + c;
 
       //std::cout << last_z << ";";
