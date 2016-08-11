@@ -37,21 +37,36 @@ long double mapPixel(const long double& p, const long double* map, const long do
 float* generateMandelBrot() {
   float* pixels = new float[TOTAL_SIZE * 3];
   unsigned int iterator = 0;
-  
+
   for(unsigned int yi = 0; yi < H ; yi++) {
     for(unsigned int xi = 0; xi < W; xi++) {
 
       long double x = mapPixel((long double)xi, x_map, (long double)W);
       long double y = mapPixel((long double)yi, y_map, (long double)H);
 
-      std::complex<long double> c;
-      c.real(x);
-      c.imag(y);
+      // implementation with std::complex
+      /* std::complex<long double> c(x, y);
 
       std::complex<long double> last_z = 0.0;
       unsigned int iteration = 0;
       while(last_z.real() * last_z.real() + last_z.imag() * last_z.imag() <= 4.0L && iteration <= MAX_ITERATIONS) {
         last_z = last_z * last_z + c;
+
+        iteration++;
+      }*/
+
+
+      // implementation without std::complex
+      unsigned int iteration = 0;
+      long double xreal = 0.0L, yimag = 0.0L;
+      while(xreal * xreal + yimag * yimag < 2.0L * 2.0L && iteration <= MAX_ITERATIONS) {
+        /*
+          fc(z) = z^2 + c
+          a + bi = (a + bi)^2 + (a2 + b2i) = a^2 + 2ab + b^2 + (a2 + b2i)
+        */
+        long double x_tmp = xreal * xreal - yimag * yimag + x;
+        yimag = 2 * xreal * yimag + y;
+        xreal = x_tmp;
 
         iteration++;
       }
