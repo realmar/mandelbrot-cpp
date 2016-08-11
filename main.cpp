@@ -62,8 +62,37 @@ float* generateMandelBrot() {
       while(xreal * xreal + yimag * yimag < 2.0L * 2.0L && iteration <= MAX_ITERATIONS) {
         /*
           fc(z) = z^2 + c
-          a + bi = (a + bi)^2 + (a2 + b2i) = a^2 + 2ab + b^2 + (a2 + b2i)
+          c := (a0 + b0i)
+          z := (a + bi)
+          z^2 := (a + bi)^2
+              = a^2 + 2abi + i * i * b * b     // i^2 = -1 (definition of i)
+              => a^2 + 2abi -b^2
+
+          => (a^2 + 2abi -b^2) + (a0 + b0i)
+          // now we add those thogether and a is the new real part aka x
+          // and b is the new imag part aka y
+          //
+          // to get the real part just add all real parts thogether
+          // and to the get imaginary part add all imaginary parts thogether
+          //
+          // x(new real) = a^2 - b^2 + a0
+          // y(new imag) = 2ab + b0
+          //
+          // here we omit the i because we dont know what it really is
+          // and also x and y are representing the veritcal and horizontal
+          // axis in a complex plane where veritcal has always a i
+          // so we dont need it
+          //
+          // when we had i * i then we would get -1 (because i^2 = -1, because of
+          // definition)
+          // but this would change everything because then it would be part
+          // of the real part
+          // because of that 2i * 2i = -4
+          // because 2 * 2 = 4
+          // and i * i = -1
+          // so -1 * 4 = -4
         */
+
         long double x_tmp = xreal * xreal - yimag * yimag + x;
         yimag = 2 * xreal * yimag + y;
         xreal = x_tmp;
