@@ -3,4 +3,4 @@ g++  -std=c++11 .\main.cpp -I"C:\TDM-GCC-64\include"  -m32 -lglu32 -lopengl32 -l
 
 # Compile under Linux
 aptitude install freeglut3-dev
-g++  main.cpp  -lGL -lglut -lGLU
+g++  main.cpp  -std=c++11 -pthread -lGL -lglut -lGLU
