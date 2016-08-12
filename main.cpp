@@ -45,9 +45,9 @@ long double mapPixel(const long double& p, const long double* map, const long do
 void generatePalette() {
   unsigned int i = 0;
 
-    for(unsigned int red = 0; red < 256; red += 33) {
-      for(unsigned int green = 0; green < 256; green += 49) {
-        for(unsigned int blue = 0; blue < 256; blue += 88) {
+    for(unsigned int red = 0; red < 256; red += rand() % 33 + 42) {
+      for(unsigned int green = 0; green < 256; green += rand() % 53 + 79) {
+        for(unsigned int blue = 0; blue < 256; blue += rand() % 88 + 99) {
           palette[i][0] = red;
           palette[i][1] = green;
           palette[i][2] = blue;
