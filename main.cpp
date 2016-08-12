@@ -29,6 +29,9 @@ pixel_x := map to -2.5, 1       // real part of c
 pixel_y := map to -1, 1         // imaginary part of c
 */
 
+unsigned int palette[MAX_ITERATIONS + 1][3];
+
+
 long double mapPixel(const long double& p, const long double* map, const long double& orig_Width) {
   /* long double f = p / orig_Width;
   long double real_part = f * abs(map[0] - map[1]);
@@ -37,6 +40,23 @@ long double mapPixel(const long double& p, const long double* map, const long do
   return real_part; */
 
   return p / orig_Width * abs(map[0] - map[1]) + map[0];
+}
+
+void generatePalette() {
+  unsigned int i = 0;
+
+    for(unsigned int red = 0; red < 256; red += 33) {
+      for(unsigned int green = 0; green < 256; green += 49) {
+        for(unsigned int blue = 0; blue < 256; blue += 88) {
+          palette[i][0] = red;
+          palette[i][1] = green;
+          palette[i][2] = blue;
+          i++;
+          if(i == MAX_ITERATIONS)
+            return void();
+      }
+    }
+  }
 }
 
 float* generateMandelBrot(float* pixels, unsigned int start) {
@@ -56,7 +76,7 @@ float* generateMandelBrot(float* pixels, unsigned int start) {
 
       std::complex<long double> last_z = 0.0;
       unsigned int iteration = 0;
-      while(last_z.real() * last_z.real() + last_z.imag() * last_z.imag() <= 4.0L && iteration <= MAX_ITERATIONS) {
+      while(last_z.real() * last_z.real() + last_z.imag() * last_z.imag() <= 4.0L && iteration < MAX_ITERATIONS) {
         last_z = last_z * last_z + c;
 
         iteration++;
@@ -66,7 +86,7 @@ float* generateMandelBrot(float* pixels, unsigned int start) {
       // implementation without std::complex
       unsigned int iteration = 0;
       long double xreal = 0.0L, yimag = 0.0L;
-      while(xreal * xreal + yimag * yimag < 2.0L * 2.0L && iteration <= MAX_ITERATIONS) {
+      while(xreal * xreal + yimag * yimag < 2.0L * 2.0L && iteration < MAX_ITERATIONS) {
         /*
           fc(z) = z^2 + c
           c := (a0 + b0i)
@@ -107,7 +127,11 @@ float* generateMandelBrot(float* pixels, unsigned int start) {
         iteration++;
       }
 
-      if(iteration > MAX_ITERATIONS / 2) {
+      pixels[iterator] = (float)(palette[iteration][0]);
+      pixels[iterator + 1] = (float)(palette[iteration][1]);
+      pixels[iterator + 2] = (float)(palette[iteration][2]);
+
+      /* if(iteration >= MAX_ITERATIONS) {
         pixels[iterator] = 255;
         pixels[iterator + 1] = 255;
         pixels[iterator + 2] = 255;
@@ -115,7 +139,7 @@ float* generateMandelBrot(float* pixels, unsigned int start) {
         pixels[iterator] = 0;
         pixels[iterator + 1] = 0;
         pixels[iterator + 2] = 0;
-      }
+      } */
 
       iterator += 3 * THREADS;
     }
@@ -153,6 +177,7 @@ void renderFunction() {
 }
 
 int main(int argc, char** argv) {
+    generatePalette();
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_SINGLE);
     glutInitWindowSize(W, H);
