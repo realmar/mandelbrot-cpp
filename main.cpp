@@ -27,22 +27,24 @@ pixel_y := map to -1, 1         // imaginary part of c
 */
 
 long double mapPixel(const long double& p, const long double* map, const long double& orig_Width) {
-  long double f = p / orig_Width;
+  /* long double f = p / orig_Width;
   long double real_part = f * abs(map[0] - map[1]);
   real_part = real_part + map[0];
 
-  return real_part;
+  return real_part; */
+
+  return p / orig_Width * abs(map[0] - map[1]) + map[0];
 }
 
 float* generateMandelBrot() {
   float* pixels = new float[TOTAL_SIZE * 3];
   unsigned int iterator = 0;
+  long double x, y;
 
   for(unsigned int yi = 0; yi < H ; yi++) {
     for(unsigned int xi = 0; xi < W; xi++) {
-
-      long double x = mapPixel((long double)xi, x_map, (long double)W);
-      long double y = mapPixel((long double)yi, y_map, (long double)H);
+      x = mapPixel((long double)xi, x_map, (long double)W);
+      y = mapPixel((long double)yi, y_map, (long double)H);
 
       // implementation with std::complex
       /* std::complex<long double> c(x, y);
