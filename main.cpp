@@ -1,5 +1,6 @@
 #define THREADS 16
 
+// using opengl for rendering
 #include <GL/freeglut.h>
 #include <GL/glut.h>
 
@@ -7,6 +8,7 @@
 #include <iostream>
 #include <thread>
 
+// used for abs
 #include <cmath>
 
 // window
@@ -31,8 +33,8 @@ pixel_y := map to -1, 1         // imaginary part of c
 
 unsigned int palette[MAX_ITERATIONS + 1][3];
 
-
 long double mapPixel(const long double& p, const long double* map, const long double& orig_Width) {
+  // Verbose math, I have minimized it below
   /* long double f = p / orig_Width;
   long double real_part = f * abs(map[0] - map[1]);
   real_part = real_part + map[0];
@@ -42,6 +44,7 @@ long double mapPixel(const long double& p, const long double* map, const long do
   return p / orig_Width * abs(map[0] - map[1]) + map[0];
 }
 
+// Generate some strange colors which are a bit random
 void generatePalette() {
   unsigned int i = 0;
 
@@ -88,6 +91,12 @@ float* generateMandelBrot(float* pixels, unsigned int start) {
       long double xreal = 0.0L, yimag = 0.0L;
       while(xreal * xreal + yimag * yimag < 2.0L * 2.0L && iteration < MAX_ITERATIONS) {
         /*
+          Explanation of the operations without using complex numbers
+          but rather emulating them with real numbers
+
+          The actual reason why I don't use std::complex anymore is that
+          it does not perform very well.
+
           fc(z) = z^2 + c
           c := (a0 + b0i)
           z := (a + bi)
@@ -96,28 +105,31 @@ float* generateMandelBrot(float* pixels, unsigned int start) {
               => a^2 + 2abi -b^2
 
           => (a^2 + 2abi -b^2) + (a0 + b0i)
-          // now we add those thogether and a is the new real part aka x
-          // and b is the new imag part aka y
-          //
-          // to get the real part just add all real parts thogether
-          // and to the get imaginary part add all imaginary parts thogether
-          //
-          // x(new real) = a^2 - b^2 + a0
-          // y(new imag) = 2ab + b0
-          //
-          // here we omit the i because we dont know what it really is
-          // and also x and y are representing the veritcal and horizontal
-          // axis in a complex plane where veritcal has always a i
-          // so we dont need it
-          //
-          // when we had i * i then we would get -1 (because i^2 = -1, because of
-          // definition)
-          // but this would change everything because then it would be part
-          // of the real part
-          // because of that 2i * 2i = -4
-          // because 2 * 2 = 4
-          // and i * i = -1
-          // so -1 * 4 = -4
+
+          now we add those thogether and a is the new real part aka x
+          and b is the new imaginary part aka y
+
+          to get the real part just add all real parts thogether
+          and to the get imaginary part add all imaginary parts thogether
+
+          x(new real) = a^2 - b^2 + a0
+          y(new imag) = 2ab + b0
+
+          here we omit the i because we dont know what it really is
+          and also x and y are representing the veritcal and horizontal
+          axis in a complex plane where veritcal has always a i
+          so we dont need it
+
+          Further thoughts:
+
+          when we had i * i then we would get -1 (because i^2 = -1, because of
+          definition)
+          but this would change everything because then it would be part
+          of the real part
+          because of that 2i * 2i = -4
+          because 2 * 2 = 4
+          and i * i = -1
+          so -1 * 4 = -4
         */
 
         long double x_tmp = xreal * xreal - yimag * yimag + x;
@@ -131,6 +143,7 @@ float* generateMandelBrot(float* pixels, unsigned int start) {
       pixels[iterator + 1] = (float)(palette[iteration][1]);
       pixels[iterator + 2] = (float)(palette[iteration][2]);
 
+      // black and white Mandelbrot
       /* if(iteration >= MAX_ITERATIONS) {
         pixels[iterator] = 255;
         pixels[iterator + 1] = 255;
