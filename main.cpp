@@ -1,14 +1,17 @@
+#define THREADS 16
+
 #include <GL/freeglut.h>
 #include <GL/glut.h>
 
 // #include <complex>
 #include <iostream>
+#include <thread>
 
 #include <cmath>
 
 // window
-const unsigned int W = 512;
-const unsigned int H = 512;
+const unsigned int W = 1024;
+const unsigned int H = 1024;
 const unsigned int TOTAL_SIZE = W * H;
 
 // Mandelbrot
@@ -36,13 +39,15 @@ long double mapPixel(const long double& p, const long double* map, const long do
   return p / orig_Width * abs(map[0] - map[1]) + map[0];
 }
 
-float* generateMandelBrot() {
-  float* pixels = new float[TOTAL_SIZE * 3];
-  unsigned int iterator = 0;
+float* generateMandelBrot(float* pixels, unsigned int start) {
+  unsigned int iterator = start * 3;
   long double x, y;
 
   for(unsigned int yi = 0; yi < H ; yi++) {
-    for(unsigned int xi = 0; xi < W; xi++) {
+    for(unsigned int xi = start; xi < W; xi += THREADS) {
+      if(xi + THREADS >= W)
+        start = (xi + THREADS) % THREADS;
+
       x = mapPixel((long double)xi, x_map, (long double)W);
       y = mapPixel((long double)yi, y_map, (long double)H);
 
@@ -112,7 +117,7 @@ float* generateMandelBrot() {
         pixels[iterator + 2] = 0;
       }
 
-      iterator += 3;
+      iterator += 3 * THREADS;
     }
   }
 
@@ -130,12 +135,21 @@ void init(void) {
 void renderFunction() {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  float* pixels;
+  float* pixels = new float[TOTAL_SIZE * 3];
 
-  glDrawPixels(W, H, GL_RGB, GL_FLOAT, generateMandelBrot());
+  std::thread* threads[THREADS];
+  for(unsigned int i = 0; i < THREADS; i++) {
+    threads[i] = new std::thread(generateMandelBrot, pixels, i);
+  }
+
+  for(unsigned int i = 0; i < THREADS; i++) {
+    threads[i]->join();
+  }
+
+  glDrawPixels(W, H, GL_RGB, GL_FLOAT, pixels);
   glutSwapBuffers();
 
-  // delete pixels;
+  delete pixels;
 }
 
 int main(int argc, char** argv) {
