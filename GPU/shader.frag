@@ -1,10 +1,13 @@
 #version 400
 out vec4 frag_colour;
 
+uniform float width;
+uniform float height;
+
 void main () {
   vec2 z, c;
-  c.x = gl_FragCoord.x / 512.0 * abs(-2.5 - 1.0) + -2.5;
-  c.y = gl_FragCoord.y / 512.0 * abs(-1.0 - 1.0) + -1.0;
+  c.x = gl_FragCoord.x / width * abs(-2.5 - 1.0) + -2.5;
+  c.y = gl_FragCoord.y / height * abs(-1.0 - 1.0) + -1.0;
 
   z.x = 0.0;
   z.y = 0.0;

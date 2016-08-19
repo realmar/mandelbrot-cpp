@@ -87,7 +87,6 @@ GLuint loadShader(const char *fragment_path) {
   }
 
   glDeleteShader(fragment_shader_object);
-
   delete frag_shader_c;
 
   return program_object;
@@ -99,11 +98,9 @@ int main(int argc, char** argv) {
     exit(1);
   }
 
-  // glewExperimental=GL_TRUE;
-
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-  // glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+  glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
   // Open a window and create its OpenGL context
   GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "GPU mandelbrot", NULL, NULL);
@@ -149,15 +146,29 @@ int main(int argc, char** argv) {
   glBindBuffer(GL_ARRAY_BUFFER, vbo);
   glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
 
+  GLint uni_width = glGetUniformLocation(program, "width");
+  GLint uni_height = glGetUniformLocation(program, "height");
+
+
   while(!glfwWindowShouldClose(window)) {
     glViewport(0, 0, WIDTH, HEIGHT);
 
+    // clear buffer
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glUseProgram(program);
 
+    // setting uniforms
+    glUniform1f(uni_width, (float)WIDTH);
+    glUniform1f(uni_height, (float)HEIGHT);
+
+    // draw stuff
     glBindVertexArray(vao);
     glDrawArrays(GL_TRIANGLES, 0, 6);
+
+    // listen to external user input eg mouse keyboard
     glfwPollEvents();
+
+    // replace frame buffer
     glfwSwapBuffers(window);
   }
 
