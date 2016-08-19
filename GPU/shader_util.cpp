@@ -6,7 +6,7 @@
 
 void readShader(const char* file, char** shader, long& size_file) {
   std::fstream fd;
-  fd.open(file, std::ios::in | std::ios::ate);
+  fd.open(file, std::ios::in | std::ios::binary | std::ios::ate);
   size_file = fd.tellg();
   fd.seekg(0, std::ios::beg);
   *shader = new char[size_file];
@@ -29,7 +29,9 @@ GLuint loadShader(const char *fragment_path) {
   // load shader files into memory
   readShader(fragment_path, &frag_shader, frag_s_len);
 
-  int frag_s_len_int =(int)frag_s_len;
+  std::cout << frag_shader << std::endl;
+
+  int frag_s_len_int = (int)frag_s_len;
 
   // This stuff has to be const ...
   const char* frag_shader_c =(const char*)frag_shader;
