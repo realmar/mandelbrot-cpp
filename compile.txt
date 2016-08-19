@@ -1,12 +1,14 @@
 # To compile under windows with TDM-GCC-64
+## CPU
 g++  -std=c++11 .\main.cpp -I"C:\TDM-GCC-64\include"  -m32 -lglu32 -lopengl32 -lfreeglut
 
-## using glew
-g++  -std=c++11 .\main.cpp -I"C:\TDM-GCC-64\include"  -L"C:\TDM-GCC-64\bin" -lglew32 -lglfw3
+## GPU
+g++  -std=c++11 .\main.cpp .\shader_util.cpp -I"C:\TDM-GCC-64\include"  -L"C:\TDM-GCC-64\bin" -lglew32 -lglfw3
 
 # Compile under Linux
+## CPU
 aptitude install freeglut3-dev
 g++  main.cpp  -std=c++11 -pthread -lGL -lglut -lGLU
 
-## using glew
-g++ main.cpp -Wall -Og -lGLEW -lglfw
+## GPU
+g++ main.cpp shader_util.cpp -Wall -Og -lGLEW -lGL -lglfw
