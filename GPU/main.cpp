@@ -1,16 +1,25 @@
-#include <iostream>
-#include <fstream>
-#include <string>
+#include <iostream>   // IO
+#include <fstream>    // to load shaders from file
 
-#include <vector>
+#include <vector>     // Used for storing the opengl error messages
 
 // using opengl for rendering
-#define GLEW_STATIC
+
+/*
+What is glew?
+
+GLEW isn't 'required'. You could use glcorearb.h header, or anything like that. However, if you link with some function - it must exist on target platform, or your program wouldn't launch. GLEW and others are exactly to handle that - you're not linking with GL functions directly, but instead getting function pointers after initialization phase. It allows you to check at runtime which extensions are present and which functions may be used.
+*/
 #include <GL/glew.h>
+/*
+What is glfw?
+
+GLFW is a small C library that allows the creation and management of windows with OpenGL contexts, making it also possible to use multiple monitors and video modes. It provides access to input from keyboard, mouse and joysticks.
+*/
 #include <GLFW/glfw3.h>
 
-const unsigned int  WIDTH = 512,
-                    HEIGHT = 512;
+const unsigned int  WIDTH = 1024,
+                    HEIGHT = 1024;
 
 void readShader(const char* file, char** shader, long& size_file) {
   std::fstream fd;
@@ -22,6 +31,13 @@ void readShader(const char* file, char** shader, long& size_file) {
   fd.close();
 }
 
+/*
+We only need a fragment shader because we do not have any vertices which needs
+to be placed on the screen.
+
+A fragment shader (pixel shader) is a shader which determines what color
+a pixel has.
+*/
 GLuint loadShader(const char *fragment_path) {
   // define variables
   char *frag_shader;
@@ -98,9 +114,10 @@ int main(int argc, char** argv) {
     exit(1);
   }
 
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-  glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+  // we require at least opengl 4
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
+  glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);   // window should no be resizable
 
   // Open a window and create its OpenGL context
   GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "GPU mandelbrot", NULL, NULL);
@@ -119,9 +136,12 @@ int main(int argc, char** argv) {
     exit(1);
   }
 
+  // load the fragment shader
   GLuint program = loadShader("shader.frag");
   std::cout << "shader loaded" << std::endl;
 
+  // those two vertices fill the whole window
+  // where (0, 0) is in the middle of the screen
    float vertices[] = {
       -1.0f, 1.0f,
       -1.0f, -1.0f,
@@ -134,11 +154,18 @@ int main(int argc, char** argv) {
 
   std::cout << "vertices generated" << std::endl;
 
+  // create vertex buffer object
+  //
+  // we essentially create an empty buffer and replace the current with it
   GLuint vbo = 0;
   glGenBuffers(1, &vbo);
   glBindBuffer(GL_ARRAY_BUFFER, vbo);
   glBufferData(GL_ARRAY_BUFFER, 6 * 2 * sizeof(float), vertices, GL_STATIC_DRAW);
 
+  // create vertex attribute object
+  //
+  // store the memory layout of the mesh (our vertices) so that we
+  // dont have to rebuilt it every time we want to draw it
   GLuint vao = 0;
   glGenVertexArrays(1, &vao);
   glBindVertexArray(vao);
@@ -146,13 +173,12 @@ int main(int argc, char** argv) {
   glBindBuffer(GL_ARRAY_BUFFER, vbo);
   glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
 
+  // get unifrom variables from shader
   GLint uni_width = glGetUniformLocation(program, "width");
   GLint uni_height = glGetUniformLocation(program, "height");
 
 
   while(!glfwWindowShouldClose(window)) {
-    glViewport(0, 0, WIDTH, HEIGHT);
-
     // clear buffer
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glUseProgram(program);

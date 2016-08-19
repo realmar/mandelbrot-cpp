@@ -4,6 +4,9 @@ out vec4 frag_colour;
 uniform float width;
 uniform float height;
 
+const vec4 start_color = vec4(0.1, 0.8, 0.3, 1.0);
+const vec4 end_color = vec4(1.0, 1.0, 1.0, 1.0);
+
 void main () {
   vec2 z, c;
   c.x = gl_FragCoord.x / width * abs(-2.5 - 1.0) + -2.5;
@@ -22,5 +25,10 @@ void main () {
     z.x = x_tmp;
   }
 
-  frag_colour = i > 99 ? vec4(1.0, 1.0, 1.0, 1.0) : vec4(0.0, 0.0, 0.0, 1.0);
+  if(i > 80) {
+    frag_colour = vec4(0.0, 0.0, 0.0, 1.0);
+  }else{
+    float c = sqrt(float(i) / float(max_iterations));
+    frag_colour = start_color * c + end_color * (1 - c);
+  }
 }
