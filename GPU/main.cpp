@@ -1,4 +1,5 @@
 #include <iostream>   // IO
+#include <algorithm>  // for max and min functions
 
 // using opengl for rendering
 
@@ -18,6 +19,75 @@ GLFW is a small C library that allows the creation and management of windows wit
 
 const unsigned int  WIDTH = 1024,
                     HEIGHT = 1024;
+
+float x_map[2] = {-2.5, 1};
+float y_map[2] = {-1, 1};
+
+struct Uniforms {
+  GLint uni_width;
+  GLint uni_height;
+
+  GLint uni_x_map;
+  GLint uni_y_map;
+};
+
+Uniforms uniforms;
+
+struct MousePosition {
+  double x;
+  double y;
+};
+
+MousePosition mouse_position;
+bool get_last_mouse_pos = false;
+bool get_curr_mouse_pos = false;
+
+float mapPixel(const float& p, const float* map, const float& orig_Width) {
+  return p / orig_Width * abs(map[0] - map[1]) + map[0];
+}
+
+void mouseClick(GLFWwindow* window, int button, int action, int mods) {
+  if(button == GLFW_MOUSE_BUTTON_LEFT) {
+    if(action == GLFW_PRESS) {
+      get_last_mouse_pos = true;
+    }else if(action == GLFW_RELEASE) {
+      get_curr_mouse_pos = true;
+    }
+  }
+}
+
+void mouseMove(GLFWwindow* window, double xpos, double ypos) {
+  if(get_last_mouse_pos) {
+    get_last_mouse_pos = false;
+
+    mouse_position.x = xpos;
+    mouse_position.y = ypos;
+  }
+
+  if(get_curr_mouse_pos) {
+    get_curr_mouse_pos = false;
+
+    float x_map_tmp[2];
+    float y_map_tmp[2];
+
+    std::cout << mouse_position.x << " : " << mouse_position.y << std::endl;
+    std::cout << xpos << " : " << ypos << std::endl;
+
+    x_map_tmp[0] = mapPixel(std::min(mouse_position.x, xpos), x_map, WIDTH);
+    x_map_tmp[1] = mapPixel(std::max(mouse_position.x, xpos), x_map, WIDTH);
+
+    y_map_tmp[0] = y_map[0] * (x_map_tmp[0] / x_map[0]);
+    y_map_tmp[1] = y_map[1] * (x_map_tmp[1] / x_map[1]);
+
+    std::cout << x_map_tmp[0] << " : " << x_map_tmp[1] << " :: " << y_map_tmp[0] << " : " << y_map_tmp[1] << std::endl;
+
+    x_map[0] = x_map_tmp[0];
+    x_map[1] = x_map_tmp[1];
+
+    y_map[0] = y_map_tmp[0];
+    y_map[1] = y_map_tmp[1];
+  }
+}
 
 int main(int argc, char** argv) {
   if(!glfwInit()) {
@@ -85,9 +155,16 @@ int main(int argc, char** argv) {
   glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
 
   // get unifrom variables from shader
-  GLint uni_width = glGetUniformLocation(program, "width");
-  GLint uni_height = glGetUniformLocation(program, "height");
 
+  uniforms.uni_width = glGetUniformLocation(program, "width");
+  uniforms.uni_height = glGetUniformLocation(program, "height");
+
+  uniforms.uni_x_map = glGetUniformLocation(program, "x_map");
+  uniforms.uni_y_map = glGetUniformLocation(program, "y_map");
+
+  // set mouse callback to register click input
+  glfwSetMouseButtonCallback(window, mouseClick);
+  glfwSetCursorPosCallback(window, mouseMove);
 
   while(!glfwWindowShouldClose(window)) {
     // clear buffer
@@ -95,8 +172,12 @@ int main(int argc, char** argv) {
     glUseProgram(program);
 
     // setting uniforms
-    glUniform1f(uni_width, (float)WIDTH);
-    glUniform1f(uni_height, (float)HEIGHT);
+    glUniform1f(uniforms.uni_width, (float)WIDTH);
+    glUniform1f(uniforms.uni_height, (float)HEIGHT);
+
+    // set the mapping range for the complex plane
+    glUniform2f(uniforms.uni_x_map, x_map[0], x_map[1]);
+    glUniform2f(uniforms.uni_y_map, y_map[0], y_map[1]);
 
     // draw stuff using our vertex attribute object
     // which holds the memory layout of our mesh

@@ -4,13 +4,16 @@ out vec4 frag_colour;
 uniform float width;
 uniform float height;
 
+uniform vec2 x_map;
+uniform vec2 y_map;
+
 const vec4 start_color = vec4(0.1, 0.8, 0.3, 1.0);
 const vec4 end_color = vec4(1.0, 1.0, 1.0, 1.0);
 
 void main () {
   vec2 z, c;
-  c.x = gl_FragCoord.x / width * abs(-2.5 - 1.0) + -2.5;
-  c.y = gl_FragCoord.y / height * abs(-1.0 - 1.0) + -1.0;
+  c.x = gl_FragCoord.x / width * abs(x_map.x - x_map.y) + x_map.x;
+  c.y = gl_FragCoord.y / height * abs(y_map.x - y_map.y) + y_map.x;
 
   z.x = 0.0;
   z.y = 0.0;
