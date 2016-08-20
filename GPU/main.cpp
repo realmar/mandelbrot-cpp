@@ -96,8 +96,6 @@ void mouseMove(GLFWwindow* window, double xpos, double ypos) {
 
     float mapped_y_pos = mapped_last_y_pos + direction * (2 * scale);
 
-    std::cout << mapped_last_y_pos << std::endl;
-
     float new_rect[2 * 6] = {
       mapped_last_x_pos, mapped_last_y_pos,
       mapped_last_x_pos, mapped_y_pos,
