@@ -1,5 +1,6 @@
 #include <iostream>   // IO
 #include <algorithm>  // for max and min functions
+#include <cmath>      // for std::fabs
 
 // using opengl for rendering
 
@@ -17,11 +18,11 @@ GLFW is a small C library that allows the creation and management of windows wit
 #include <GLFW/glfw3.h>
 #include "shader_util.hpp"
 
-const unsigned int  WIDTH = 1024,
-                    HEIGHT = 1024;
+const float   WIDTH = 1024,
+              HEIGHT = 1024;
 
-float x_map[2] = {-2.5, 1};
-float y_map[2] = {-1, 1};
+float x_map[2] = {-3, 1};
+float y_map[2] = {-2, 2};
 
 struct Uniforms {
   GLint uni_width;
@@ -38,12 +39,12 @@ struct MousePosition {
   double y;
 };
 
-MousePosition mouse_position;
+MousePosition last_mouse_position;
 bool get_last_mouse_pos = false;
 bool get_curr_mouse_pos = false;
 
 float mapPixel(const float& p, const float* map, const float& orig_Width) {
-  return p / orig_Width * abs(map[0] - map[1]) + map[0];
+  return p / orig_Width * std::fabs(map[0] - map[1]) + map[0];
 }
 
 void mouseClick(GLFWwindow* window, int button, int action, int mods) {
@@ -60,8 +61,8 @@ void mouseMove(GLFWwindow* window, double xpos, double ypos) {
   if(get_last_mouse_pos) {
     get_last_mouse_pos = false;
 
-    mouse_position.x = xpos;
-    mouse_position.y = ypos;
+    last_mouse_position.x = xpos;
+    last_mouse_position.y = ypos;
   }
 
   if(get_curr_mouse_pos) {
@@ -70,16 +71,14 @@ void mouseMove(GLFWwindow* window, double xpos, double ypos) {
     float x_map_tmp[2];
     float y_map_tmp[2];
 
-    std::cout << mouse_position.x << " : " << mouse_position.y << std::endl;
-    std::cout << xpos << " : " << ypos << std::endl;
+    x_map_tmp[0] = mapPixel(std::min(last_mouse_position.x, xpos), x_map, WIDTH);
+    x_map_tmp[1] = mapPixel(std::max(last_mouse_position.x, xpos), x_map, WIDTH);
 
-    x_map_tmp[0] = mapPixel(std::min(mouse_position.x, xpos), x_map, WIDTH);
-    x_map_tmp[1] = mapPixel(std::max(mouse_position.x, xpos), x_map, WIDTH);
+    float scale = std::fabs(last_mouse_position.x - xpos) / WIDTH;
+    float new_y_range = std::fabs(y_map[0] - y_map[1]) * scale;
 
-    y_map_tmp[0] = y_map[0] * (x_map_tmp[0] / x_map[0]);
-    y_map_tmp[1] = y_map[1] * (x_map_tmp[1] / x_map[1]);
-
-    std::cout << x_map_tmp[0] << " : " << x_map_tmp[1] << " :: " << y_map_tmp[0] << " : " << y_map_tmp[1] << std::endl;
+    y_map_tmp[0] = mapPixel(HEIGHT - std::max(last_mouse_position.y, ypos), y_map, HEIGHT);
+    y_map_tmp[1] = y_map_tmp[0] + new_y_range;
 
     x_map[0] = x_map_tmp[0];
     x_map[1] = x_map_tmp[1];

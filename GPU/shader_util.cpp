@@ -29,8 +29,6 @@ GLuint loadShader(const char *fragment_path) {
   // load shader files into memory
   readShader(fragment_path, &frag_shader, frag_s_len);
 
-  std::cout << frag_shader << std::endl;
-
   int frag_s_len_int = (int)frag_s_len;
 
   // This stuff has to be const ...
