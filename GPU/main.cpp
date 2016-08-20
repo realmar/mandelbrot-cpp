@@ -18,11 +18,11 @@ GLFW is a small C library that allows the creation and management of windows wit
 #include <GLFW/glfw3.h>
 #include "shader_util.hpp"
 
-const float   WIDTH = 1024,
+const double   WIDTH = 1024,
               HEIGHT = 1024;
 
-float x_map[2] = {-3, 1};
-float y_map[2] = {-2, 2};
+double x_map[2] = {-3, 1};
+double y_map[2] = {-2, 2};
 
 struct Uniforms {
   GLint uni_width;
@@ -43,7 +43,7 @@ MousePosition last_mouse_position;
 bool get_last_mouse_pos = false;
 bool get_curr_mouse_pos = false;
 
-float mapPixel(const float& p, const float* map, const float& orig_Width) {
+double mapPixel(const double& p, const double* map, const double& orig_Width) {
   return p / orig_Width * std::fabs(map[0] - map[1]) + map[0];
 }
 
@@ -68,14 +68,14 @@ void mouseMove(GLFWwindow* window, double xpos, double ypos) {
   if(get_curr_mouse_pos) {
     get_curr_mouse_pos = false;
 
-    float x_map_tmp[2];
-    float y_map_tmp[2];
+    double x_map_tmp[2];
+    double y_map_tmp[2];
 
     x_map_tmp[0] = mapPixel(std::min(last_mouse_position.x, xpos), x_map, WIDTH);
     x_map_tmp[1] = mapPixel(std::max(last_mouse_position.x, xpos), x_map, WIDTH);
 
-    float scale = std::fabs(last_mouse_position.x - xpos) / WIDTH;
-    float new_y_range = std::fabs(y_map[0] - y_map[1]) * scale;
+    double scale = std::fabs(last_mouse_position.x - xpos) / WIDTH;
+    double new_y_range = std::fabs(y_map[0] - y_map[1]) * scale;
 
     y_map_tmp[0] = mapPixel(HEIGHT - std::max(last_mouse_position.y, ypos), y_map, HEIGHT);
     y_map_tmp[1] = y_map_tmp[0] + new_y_range;
@@ -171,12 +171,12 @@ int main(int argc, char** argv) {
     glUseProgram(program);
 
     // setting uniforms
-    glUniform1f(uniforms.uni_width, (float)WIDTH);
-    glUniform1f(uniforms.uni_height, (float)HEIGHT);
+    glUniform1d(uniforms.uni_width, (double)WIDTH);
+    glUniform1d(uniforms.uni_height, (double)HEIGHT);
 
     // set the mapping range for the complex plane
-    glUniform2f(uniforms.uni_x_map, x_map[0], x_map[1]);
-    glUniform2f(uniforms.uni_y_map, y_map[0], y_map[1]);
+    glUniform2d(uniforms.uni_x_map, x_map[0], x_map[1]);
+    glUniform2d(uniforms.uni_y_map, y_map[0], y_map[1]);
 
     // draw stuff using our vertex attribute object
     // which holds the memory layout of our mesh
