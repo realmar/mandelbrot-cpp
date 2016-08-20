@@ -9,8 +9,8 @@ uniform double height;
 uniform dvec2 x_map;
 uniform dvec2 y_map;
 
-const vec4 start_color = vec4(0.1, 0.8, 0.3, 1.0);
-const vec4 end_color = vec4(1.0, 1.0, 1.0, 1.0);
+const vec4 start_color = vec4(0.32734, 0.16745, 0.6382, 1.0);
+const vec4 end_color = vec4(0.783474, 0.62384, 0.92635, 1.0);
 
 void main () {
   dvec2 z, c;
