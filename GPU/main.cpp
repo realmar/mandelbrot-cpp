@@ -1,6 +1,7 @@
 #include <iostream>   // IO
-#include <algorithm>  // for max and min functions
+#include <algorithm>  // for max, min and for_each functions
 #include <cmath>      // for std::fabs
+#include <vector>     // for the render functions
 
 // using opengl for rendering
 
@@ -16,13 +17,14 @@ What is glfw?
 GLFW is a small C library that allows the creation and management of windows with OpenGL contexts, making it also possible to use multiple monitors and video modes. It provides access to input from keyboard, mouse and joysticks.
 */
 #include <GLFW/glfw3.h>
-#include "shader_util.hpp"
+#include "vertex_object.hpp"
 
 const double   WIDTH = 1024,
               HEIGHT = 1024;
 
 double x_map[2] = {-3, 1};
 double y_map[2] = {-2, 2};
+double screen_map[] = {-1, 1};
 
 struct Uniforms {
   GLint uni_width;
@@ -42,6 +44,11 @@ struct MousePosition {
 MousePosition last_mouse_position;
 bool get_last_mouse_pos = false;
 bool get_curr_mouse_pos = false;
+bool mouse_down = false;
+
+float rect[2 * 6] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
+ VertexObject* selection_rect_vertex_o;
 
 double mapPixel(const double& p, const double* map, const double& orig_Width) {
   return p / orig_Width * std::fabs(map[0] - map[1]) + map[0];
@@ -51,8 +58,10 @@ void mouseClick(GLFWwindow* window, int button, int action, int mods) {
   if(button == GLFW_MOUSE_BUTTON_LEFT) {
     if(action == GLFW_PRESS) {
       get_last_mouse_pos = true;
+      mouse_down = true;
     }else if(action == GLFW_RELEASE) {
       get_curr_mouse_pos = true;
+      mouse_down = false;
     }
   }
 }
@@ -63,6 +72,37 @@ void mouseMove(GLFWwindow* window, double xpos, double ypos) {
 
     last_mouse_position.x = xpos;
     last_mouse_position.y = ypos;
+  }
+
+  if(mouse_down) {
+    float mapped_last_x_pos = mapPixel(last_mouse_position.x, screen_map, WIDTH);
+    float mapped_x_pos = mapPixel(xpos, screen_map, WIDTH);
+
+    float scale = (last_mouse_position.x - xpos) / WIDTH;
+
+    float mapped_last_y_pos = 0 - mapPixel(last_mouse_position.y, screen_map, HEIGHT);
+
+    float unscaled_mapped_y_pos = 0 - mapPixel(ypos, screen_map, HEIGHT);
+    float direction = 1;
+    if( (unscaled_mapped_y_pos < mapped_last_y_pos && mapped_x_pos < mapped_last_x_pos) ||
+        (unscaled_mapped_y_pos > mapped_last_y_pos && mapped_x_pos > mapped_last_x_pos))
+      direction = -1;
+
+    float mapped_y_pos = mapped_last_y_pos + direction * (2 * scale);
+
+    std::cout << mapped_last_y_pos << std::endl;
+
+    float new_rect[2 * 6] = {
+      mapped_last_x_pos, mapped_last_y_pos,
+      mapped_last_x_pos, mapped_y_pos,
+      mapped_x_pos, mapped_y_pos,
+
+      mapped_x_pos, mapped_last_y_pos,
+      mapped_last_x_pos, mapped_last_y_pos,
+      mapped_x_pos, mapped_y_pos
+    };
+
+    selection_rect_vertex_o->setVertices(new_rect);
   }
 
   if(get_curr_mouse_pos) {
@@ -116,13 +156,13 @@ int main(int argc, char** argv) {
     exit(1);
   }
 
-  // load the fragment shader
-  GLuint program = loadShader("shader.frag");
-  std::cout << "shader loaded" << std::endl;
+  // set mouse callback to register click input
+  glfwSetMouseButtonCallback(window, mouseClick);
+  glfwSetCursorPosCallback(window, mouseMove);
 
   // those two vertices fill the whole window
   // where (0, 0) is in the middle of the screen
-   float vertices[] = {
+   float fullscreen_verts[] = {
       -1.0f, 1.0f,
       -1.0f, -1.0f,
       1.0f, -1.0f,
@@ -132,43 +172,22 @@ int main(int argc, char** argv) {
       1.0f, -1.0f
     };
 
-  std::cout << "vertices generated" << std::endl;
-
-  // create vertex buffer object
-  //
-  // we essentially create an empty buffer and replace the current with it
-  GLuint vbo = 0;
-  glGenBuffers(1, &vbo);
-  glBindBuffer(GL_ARRAY_BUFFER, vbo);
-  glBufferData(GL_ARRAY_BUFFER, 6 * 2 * sizeof(float), vertices, GL_STATIC_DRAW);
-
-  // create vertex attribute object
-  //
-  // store the memory layout of the mesh (our vertices) so that we
-  // dont have to rebuilt it every time we want to draw it
-  GLuint vao = 0;
-  glGenVertexArrays(1, &vao);
-  glBindVertexArray(vao);
-  glEnableVertexAttribArray(0);
-  glBindBuffer(GL_ARRAY_BUFFER, vbo);
-  glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
+  VertexObject mandelbrot_vertex_o = VertexObject("shader.frag", fullscreen_verts, 6, 2);
 
   // get unifrom variables from shader
+  uniforms.uni_width = glGetUniformLocation(mandelbrot_vertex_o.getProgram(), "width");
+  uniforms.uni_height = glGetUniformLocation(mandelbrot_vertex_o.getProgram(), "height");
 
-  uniforms.uni_width = glGetUniformLocation(program, "width");
-  uniforms.uni_height = glGetUniformLocation(program, "height");
+  uniforms.uni_x_map = glGetUniformLocation(mandelbrot_vertex_o.getProgram(), "x_map");
+  uniforms.uni_y_map = glGetUniformLocation(mandelbrot_vertex_o.getProgram(), "y_map");
 
-  uniforms.uni_x_map = glGetUniformLocation(program, "x_map");
-  uniforms.uni_y_map = glGetUniformLocation(program, "y_map");
-
-  // set mouse callback to register click input
-  glfwSetMouseButtonCallback(window, mouseClick);
-  glfwSetCursorPosCallback(window, mouseMove);
+  selection_rect_vertex_o = new VertexObject("rect.frag", rect,  6, 2);
 
   while(!glfwWindowShouldClose(window)) {
     // clear buffer
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glUseProgram(program);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    glUseProgram(mandelbrot_vertex_o.getProgram());
 
     // setting uniforms
     glUniform1d(uniforms.uni_width, (double)WIDTH);
@@ -179,9 +198,15 @@ int main(int argc, char** argv) {
     glUniform2d(uniforms.uni_y_map, y_map[0], y_map[1]);
 
     // draw stuff using our vertex attribute object
-    // which holds the memory layout of our mesh
-    glBindVertexArray(vao);
+    // which holds the memory layout of our meshrv
+    glBindVertexArray(mandelbrot_vertex_o.getVertexAttribute());
     glDrawArrays(GL_TRIANGLES, 0, 6);
+
+    if(mouse_down && !get_last_mouse_pos) {
+      glUseProgram(selection_rect_vertex_o->getProgram());
+      glBindVertexArray(selection_rect_vertex_o->getVertexAttribute());
+      glDrawArrays(GL_TRIANGLES, 0, 6);
+    }
 
     // listen to external user input eg mouse keyboard
     glfwPollEvents();
@@ -193,6 +218,8 @@ int main(int argc, char** argv) {
   // close context
   glfwDestroyWindow(window);
   glfwTerminate();
+
+  delete selection_rect_vertex_o;
 
   return 0;
 }

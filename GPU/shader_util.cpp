@@ -34,22 +34,14 @@ GLuint loadShader(const char *fragment_path) {
   // This stuff has to be const ...
   const char* frag_shader_c =(const char*)frag_shader;
 
-  std::cout << "read shader in memory" << std::endl;
-
   // create vertex and fragment shader objects
   GLuint fragment_shader_object = glCreateShader(GL_FRAGMENT_SHADER);
-
-  std::cout << "created shader object: " << std::endl;
 
   // attach shader source to shader objects
   glShaderSource(fragment_shader_object, 1, &frag_shader_c, &frag_s_len_int);
 
-  std::cout << "attached shader to shader object" << std::endl;
-
   // compile the shaders
   glCompileShader(fragment_shader_object);
-
-  std::cout << "compiled shader" << std::endl;
 
   int log_length;
 
