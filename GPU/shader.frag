@@ -1,4 +1,4 @@
-// use opengl 4 in order to do double precision
+// use opengl 4 in order to use double precision
 #version 410
 out vec4 frag_colour;
 

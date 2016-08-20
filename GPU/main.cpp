@@ -19,7 +19,7 @@ GLFW is a small C library that allows the creation and management of windows wit
 #include <GLFW/glfw3.h>
 #include "vertex_object.hpp"
 
-const double   WIDTH = 1024,
+const double  WIDTH = 1024,
               HEIGHT = 1024;
 
 double x_map[2] = {-3, 1};
@@ -41,19 +41,24 @@ struct MousePosition {
   double y;
 };
 
+// store the last mouse position
 MousePosition last_mouse_position;
 bool get_last_mouse_pos = false;
 bool get_curr_mouse_pos = false;
 bool mouse_down = false;
 
+// This is the rect which gets drawn when the user points and drags with the mouse
 float rect[2 * 6] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
- VertexObject* selection_rect_vertex_o;
+// vbo, vao, shader and program of the selection rect
+VertexObject* selection_rect_vertex_o;
 
+// conversion between different axis
 double mapPixel(const double& p, const double* map, const double& orig_Width) {
   return p / orig_Width * std::fabs(map[0] - map[1]) + map[0];
 }
 
+// mouse click callback
 void mouseClick(GLFWwindow* window, int button, int action, int mods) {
   if(button == GLFW_MOUSE_BUTTON_LEFT) {
     if(action == GLFW_PRESS) {
@@ -66,6 +71,7 @@ void mouseClick(GLFWwindow* window, int button, int action, int mods) {
   }
 }
 
+// mouse move callback
 void mouseMove(GLFWwindow* window, double xpos, double ypos) {
   if(get_last_mouse_pos) {
     get_last_mouse_pos = false;
@@ -134,6 +140,7 @@ int main(int argc, char** argv) {
     exit(1);
   }
 
+  // set window hints
   // we require at least opengl 4
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
@@ -146,6 +153,7 @@ int main(int argc, char** argv) {
     exit(1);
   }
 
+  // make the just created context the current context
   glfwMakeContextCurrent(window);
 
   // init glew
@@ -172,21 +180,27 @@ int main(int argc, char** argv) {
       1.0f, -1.0f
     };
 
+  // vbo, vao, shader and program of the actual mandelbrot
   VertexObject mandelbrot_vertex_o = VertexObject("shader.frag", fullscreen_verts, 6, 2);
 
   // get unifrom variables from shader
+  // uniforms are global variables which are shared between GPU and CPU
   uniforms.uni_width = glGetUniformLocation(mandelbrot_vertex_o.getProgram(), "width");
   uniforms.uni_height = glGetUniformLocation(mandelbrot_vertex_o.getProgram(), "height");
 
   uniforms.uni_x_map = glGetUniformLocation(mandelbrot_vertex_o.getProgram(), "x_map");
   uniforms.uni_y_map = glGetUniformLocation(mandelbrot_vertex_o.getProgram(), "y_map");
 
+  // now initialize the selection rect
+  // we do this now because the opengl context has to initialized first
   selection_rect_vertex_o = new VertexObject("rect.frag", rect,  6, 2);
 
+  // do this while the window should not close
   while(!glfwWindowShouldClose(window)) {
     // clear buffer
     glClear(GL_COLOR_BUFFER_BIT);
 
+    // use mandelbrot program (aka shader)
     glUseProgram(mandelbrot_vertex_o.getProgram());
 
     // setting uniforms
@@ -219,7 +233,7 @@ int main(int argc, char** argv) {
   glfwDestroyWindow(window);
   glfwTerminate();
 
-  delete selection_rect_vertex_o;
+  delete selection_rect_vertex_o;     // delete stuff in the heap
 
   return 0;
 }

@@ -1,4 +1,4 @@
-// use opengl 4 in order to do double precision
+// this is the fragment shader for the selection rect
 #version 410
 out vec4 frag_colour;
 
