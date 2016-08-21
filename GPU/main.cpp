@@ -2,6 +2,7 @@
 #include <algorithm>  // for max, min and for_each functions
 #include <cmath>      // for std::fabs
 #include <vector>     // for the render functions
+#include <random>     // for color generation
 
 // using opengl for rendering
 
@@ -32,6 +33,9 @@ struct Uniforms {
 
   GLint uni_x_map;
   GLint uni_y_map;
+
+  GLint uni_start_color;
+  GLint uni_end_color;
 };
 
 Uniforms uniforms;
@@ -39,6 +43,15 @@ Uniforms uniforms;
 struct MousePosition {
   double x;
   double y;
+};
+
+struct Color {
+  float x;
+  float y;
+  float z;
+  float w;
+
+  Color(float x, float y, float z, float w) : x(x), y(y), z(z), w(w) {};
 };
 
 // store the last mouse position
@@ -54,6 +67,15 @@ float rect[2 * 6] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 // vbo, vao, shader and program of the selection rect
 VertexObject* selection_rect_vertex_o;
+
+// Setting the initial colors
+Color start_color(0.12344, 0.346532, 0.22344, 0.15563);
+Color end_color(0.92344, 0.646532, 0.82344, 0.85563);
+
+// initialize the mersenne twister algorithm for high quality random numbers
+std::random_device rd;
+std::mt19937 gen(rd());
+std::uniform_real_distribution<float> random01(0, 1);
 
 // conversion between different axis
 double mapPixel(const double& p, const double* map, const double& orig_Width) {
@@ -136,6 +158,26 @@ void mouseMove(GLFWwindow* window, double xpos, double ypos) {
   }
 }
 
+void keyPressed(GLFWwindow* window, int key, int scancode, int action, int mods) {
+  if (key == GLFW_KEY_R && action == GLFW_PRESS) {
+    start_color.x = random01(gen);
+    start_color.y = random01(gen);
+    start_color.z = random01(gen);
+    start_color.w = random01(gen);
+
+    std::uniform_real_distribution<float> ex(start_color.x, 1);
+    end_color.x = ex(gen);
+    std::uniform_real_distribution<float> ey(start_color.y, 1);
+    end_color.y = ey(gen);
+    std::uniform_real_distribution<float> ez(start_color.z, 1);
+    end_color.z = ez(gen);
+    std::uniform_real_distribution<float> ew(start_color.w, 1);
+    end_color.w = ew(gen);
+
+    render_frame = true;
+  }
+}
+
 int main(int argc, char** argv) {
   if(!glfwInit()) {
     std::cout << "glfw is not so ok" << std::endl;
@@ -169,6 +211,7 @@ int main(int argc, char** argv) {
   // set mouse callback to register click input
   glfwSetMouseButtonCallback(window, mouseClick);
   glfwSetCursorPosCallback(window, mouseMove);
+  glfwSetKeyCallback(window, keyPressed);
 
   // those two vertices fill the whole window
   // where (0, 0) is in the middle of the screen
@@ -192,6 +235,9 @@ int main(int argc, char** argv) {
 
   uniforms.uni_x_map = glGetUniformLocation(mandelbrot_vertex_o.getProgram(), "x_map");
   uniforms.uni_y_map = glGetUniformLocation(mandelbrot_vertex_o.getProgram(), "y_map");
+
+  uniforms.uni_start_color = glGetUniformLocation(mandelbrot_vertex_o.getProgram(), "start_color");
+  uniforms.uni_end_color = glGetUniformLocation(mandelbrot_vertex_o.getProgram(), "end_color");
 
   // now initialize the selection rect
   // we do this now because the opengl context has to initialized first
@@ -221,6 +267,10 @@ int main(int argc, char** argv) {
       glUniform2d(uniforms.uni_x_map, x_map[0], x_map[1]);
       glUniform2d(uniforms.uni_y_map, y_map[0], y_map[1]);
 
+      // Setting the colors
+      glUniform4f(uniforms.uni_start_color, start_color.x, start_color.y, start_color.z, start_color.w);
+      glUniform4f(uniforms.uni_end_color, end_color.x, end_color.y, end_color.z, end_color.w);
+
       // draw stuff using our vertex attribute object
       // which holds the memory layout of our meshrv
       glBindVertexArray(mandelbrot_vertex_o.getVertexAttribute());
@@ -231,7 +281,6 @@ int main(int argc, char** argv) {
         glBindVertexArray(selection_rect_vertex_o->getVertexAttribute());
         glDrawArrays(GL_TRIANGLES, 0, 6);
       }
-
 
       // replace frame buffer
       glfwSwapBuffers(window);

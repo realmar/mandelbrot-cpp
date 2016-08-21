@@ -9,8 +9,8 @@ uniform double height;
 uniform dvec2 x_map;
 uniform dvec2 y_map;
 
-const vec4 start_color = vec4(0.32734, 0.16745, 0.6382, 1.0);
-const vec4 end_color = vec4(0.783474, 0.62384, 0.92635, 1.0);
+uniform vec4 start_color;
+uniform vec4 end_color;
 
 void main () {
   dvec2 z, c;
@@ -20,7 +20,7 @@ void main () {
   z.x = 0.0;
   z.y = 0.0;
 
-  int max_iterations = 1000;
+  int max_iterations = 400;
   int i = 0;
   for(i = 0; i < max_iterations; i++) {
     if(z.x * z.x + z.y * z.y > 4.0) break;
@@ -33,7 +33,7 @@ void main () {
   if(i > max_iterations - 1) {
     frag_colour = vec4(0.0, 0.0, 0.0, 1.0);
   }else{
-    float c = sqrt(float(i) / float(max_iterations));
-    frag_colour = start_color * c + end_color * (1 - c);
+    float c = sqrt(float(i) * 6 / float(max_iterations));
+    frag_colour = start_color * c / 10 + end_color * (1 - c);
   }
 }
