@@ -47,6 +47,8 @@ bool get_last_mouse_pos = false;
 bool get_curr_mouse_pos = false;
 bool mouse_down = false;
 
+bool render_frame = true;
+
 // This is the rect which gets drawn when the user points and drags with the mouse
 float rect[2 * 6] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
@@ -129,6 +131,8 @@ void mouseMove(GLFWwindow* window, double xpos, double ypos) {
 
     y_map[0] = y_map_tmp[0];
     y_map[1] = y_map_tmp[1];
+
+    render_frame = true;
   }
 }
 
@@ -200,36 +204,42 @@ int main(int argc, char** argv) {
 
   // do this while the window should not close
   while(!glfwWindowShouldClose(window)) {
-    // clear buffer
-    glClear(GL_COLOR_BUFFER_BIT);
+    if(render_frame || (mouse_down && !get_last_mouse_pos)) {
+      render_frame = false;
 
-    // use mandelbrot program (aka shader)
-    glUseProgram(mandelbrot_vertex_o.getProgram());
+      // clear buffer
+      glClear(GL_COLOR_BUFFER_BIT);
 
-    // setting uniforms
-    glUniform1d(uniforms.uni_width, (double)WIDTH);
-    glUniform1d(uniforms.uni_height, (double)HEIGHT);
+      // use mandelbrot program (aka shader)
+      glUseProgram(mandelbrot_vertex_o.getProgram());
 
-    // set the mapping range for the complex plane
-    glUniform2d(uniforms.uni_x_map, x_map[0], x_map[1]);
-    glUniform2d(uniforms.uni_y_map, y_map[0], y_map[1]);
+      // setting uniforms
+      glUniform1d(uniforms.uni_width, (double)WIDTH);
+      glUniform1d(uniforms.uni_height, (double)HEIGHT);
 
-    // draw stuff using our vertex attribute object
-    // which holds the memory layout of our meshrv
-    glBindVertexArray(mandelbrot_vertex_o.getVertexAttribute());
-    glDrawArrays(GL_TRIANGLES, 0, 6);
+      // set the mapping range for the complex plane
+      glUniform2d(uniforms.uni_x_map, x_map[0], x_map[1]);
+      glUniform2d(uniforms.uni_y_map, y_map[0], y_map[1]);
 
-    if(mouse_down && !get_last_mouse_pos) {
-      glUseProgram(selection_rect_vertex_o->getProgram());
-      glBindVertexArray(selection_rect_vertex_o->getVertexAttribute());
+      // draw stuff using our vertex attribute object
+      // which holds the memory layout of our meshrv
+      glBindVertexArray(mandelbrot_vertex_o.getVertexAttribute());
       glDrawArrays(GL_TRIANGLES, 0, 6);
+
+      if(mouse_down && !get_last_mouse_pos) {
+        glUseProgram(selection_rect_vertex_o->getProgram());
+        glBindVertexArray(selection_rect_vertex_o->getVertexAttribute());
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+      }
+
+
+      // replace frame buffer
+      glfwSwapBuffers(window);
     }
 
     // listen to external user input eg mouse keyboard
     glfwPollEvents();
 
-    // replace frame buffer
-    glfwSwapBuffers(window);
   }
 
   // close context
