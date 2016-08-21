@@ -193,6 +193,11 @@ int main(int argc, char** argv) {
   // we do this now because the opengl context has to initialized first
   selection_rect_vertex_o = new VertexObject("rect.frag", rect,  6, 2);
 
+  // Enable blending
+  // So that our selection rect is transparent
+  glEnable (GL_BLEND);            // blend the computed fragment color values with the values in the color buffers
+  glBlendFunc (GL_ONE, GL_ONE);   // specifies how should be blended
+
   // do this while the window should not close
   while(!glfwWindowShouldClose(window)) {
     // clear buffer
