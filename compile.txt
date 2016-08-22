@@ -11,4 +11,4 @@ aptitude install freeglut3-dev
 g++  main.cpp  -std=c++11 -pthread -lGL -lglut -lGLU
 
 ## GPU
-g++ main.cpp shader_util.cpp -Wall -Og -lGLEW -lGL -lglfw
+g++ main.cpp shader_util.cpp vertex_object.cpp -std=c++11 -Wall -Og -lGLEW -lGL -lglfw
