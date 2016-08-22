@@ -37,9 +37,9 @@ void main () {
     // frag_colour = start_color * c / 600 + end_color * (1 - c);
 
     float c = sqrt(float(i) / float(max_iterations)) / 2;
-    float x = (start_color.x / c / 2.0 / end_color.x) / c / 10.0;
-    float y = (start_color.y / c * 2.0 / end_color.y) / c / 15.0;
-    float z = (start_color.z / c / 2.0 / end_color.z) / c / 30.0;
-    frag_colour = vec4(x * z * 10.0, y * x / 12.0, z * y / x / 20.0 , 1.0);
+    float x = (cos(start_color.x) / c / sin(end_color.x)) / tan(c) / sin(12.0);
+    float y = (sin(start_color.y) / c / tan(end_color.y)) / sin(c) / cos(22.0);
+    float z = (tan(start_color.z) / c / cos(end_color.z)) / cos(c) / tan(32.0);
+    frag_colour = vec4(cos(x), sin(y), sin(z) , 1.0);
   }
 }
