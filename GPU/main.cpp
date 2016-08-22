@@ -245,8 +245,8 @@ int main(int argc, char** argv) {
 
   // Enable blending
   // So that our selection rect is transparent
-  glEnable (GL_BLEND);            // blend the computed fragment color values with the values in the color buffers
-  glBlendFunc (GL_ONE, GL_ONE);   // specifies how should be blended
+  glEnable(GL_BLEND);                             // blend the computed fragment color values with the values in the color buffers
+  glBlendFunc(GL_ONE, GL_ONE);     // specifies how should be blended
 
   // do this while the window should not close
   while(!glfwWindowShouldClose(window)) {

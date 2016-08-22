@@ -33,7 +33,13 @@ void main () {
   if(i > max_iterations - 1) {
     frag_colour = vec4(0.0, 0.0, 0.0, 1.0);
   }else{
-    float c = sqrt(float(i) * 4 / float(max_iterations));
-    frag_colour = start_color * c / 600 + end_color * (1 - c);
+    // float c = sqrt(float(i) * 4 / float(max_iterations));
+    // frag_colour = start_color * c / 600 + end_color * (1 - c);
+
+    float c = sqrt(float(i) / float(max_iterations)) / 2;
+    float x = (start_color.x / c / 2.0 / end_color.x) / c / 10.0;
+    float y = (start_color.y / c * 2.0 / end_color.y) / c / 15.0;
+    float z = (start_color.z / c / 2.0 / end_color.z) / c / 30.0;
+    frag_colour = vec4(x * z * 10.0, y * x / 12.0, z * y / x / 20.0 , 1.0);
   }
 }
