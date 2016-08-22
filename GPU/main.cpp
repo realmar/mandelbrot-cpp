@@ -23,6 +23,9 @@ GLFW is a small C library that allows the creation and management of windows wit
 const double  WIDTH = 1024,
               HEIGHT = 1024;
 
+double orig_x_map[2] = {-3, 1};
+double orig_y_map[2] = {-2, 2};
+
 double x_map[2] = {-3, 1};
 double y_map[2] = {-2, 2};
 double screen_map[] = {-1, 1};
@@ -159,7 +162,7 @@ void mouseMove(GLFWwindow* window, double xpos, double ypos) {
 }
 
 void keyPressed(GLFWwindow* window, int key, int scancode, int action, int mods) {
-  if (key == GLFW_KEY_R && action == GLFW_PRESS) {
+  if (key == GLFW_KEY_E && action == GLFW_PRESS) {
     start_color.x = random01(gen);
     start_color.y = random01(gen);
     start_color.z = random01(gen);
@@ -173,6 +176,16 @@ void keyPressed(GLFWwindow* window, int key, int scancode, int action, int mods)
     end_color.z = ez(gen);
     std::uniform_real_distribution<float> ew(start_color.w, 1);
     end_color.w = ew(gen);
+
+    render_frame = true;
+  }
+
+  if (key == GLFW_KEY_R && action == GLFW_PRESS) {
+    x_map[0] = orig_x_map[0];
+    x_map[1] = orig_x_map[1];
+
+    y_map[0] = orig_y_map[0];
+    y_map[1] = orig_y_map[1];
 
     render_frame = true;
   }
