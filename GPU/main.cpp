@@ -229,18 +229,14 @@ void keyPressed(GLFWwindow* window, int key, int scancode, int action, int mods)
 }
 
 void scollInput(GLFWwindow* window, double xoffset, double yoffset) {
-  std::cout << xoffset << " : " << yoffset << std::endl;
-
   double scale_x = std::fabs(x_map[0] - x_map[1]) / 40;
   double scale_y = std::fabs(y_map[0] - y_map[1]) / 40;
   if(yoffset > 0) {
-    std::cout << "> 0" << std::endl;
     x_map[0] += scale_x;
     x_map[1] -= scale_x;
     y_map[0] += scale_y;
     y_map[1] -= scale_y;
   }else if(yoffset < 0) {
-    std::cout << "< 0" << std::endl;
     x_map[0] -= scale_x;
     x_map[1] += scale_x;
     y_map[0] -= scale_y;
