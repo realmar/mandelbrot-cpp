@@ -178,6 +178,8 @@ void keyPressed(GLFWwindow* window, int key, int scancode, int action, int mods)
     end_color.w = ew(gen);
 
     render_frame = true;
+
+    return;
   }
 
   if (key == GLFW_KEY_R && action == GLFW_PRESS) {
@@ -188,6 +190,41 @@ void keyPressed(GLFWwindow* window, int key, int scancode, int action, int mods)
     y_map[1] = orig_y_map[1];
 
     render_frame = true;
+
+    return;
+  }
+
+
+  double scale_x = std::fabs(x_map[0] - x_map[1]) / 100;
+  double scale_y = std::fabs(y_map[0] - y_map[1]) / 100;
+  switch(key) {
+    case GLFW_KEY_UP:
+      y_map[0] += scale_y;
+      y_map[1] += scale_y;
+
+      render_frame = true;
+      break;
+
+    case GLFW_KEY_DOWN:
+      y_map[0] -= scale_y;
+      y_map[1] -= scale_y;
+
+      render_frame = true;
+      break;
+
+    case GLFW_KEY_RIGHT:
+      x_map[0] += scale_x;
+      x_map[1] += scale_x;
+
+      render_frame = true;
+      break;
+
+    case GLFW_KEY_LEFT:
+      x_map[0] -= scale_x;
+      x_map[1] -= scale_x;
+
+      render_frame = true;
+      break;
   }
 }
 
