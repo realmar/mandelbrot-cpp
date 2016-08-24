@@ -228,6 +228,28 @@ void keyPressed(GLFWwindow* window, int key, int scancode, int action, int mods)
   }
 }
 
+void scollInput(GLFWwindow* window, double xoffset, double yoffset) {
+  std::cout << xoffset << " : " << yoffset << std::endl;
+
+  double scale_x = std::fabs(x_map[0] - x_map[1]) / 40;
+  double scale_y = std::fabs(y_map[0] - y_map[1]) / 40;
+  if(yoffset > 0) {
+    std::cout << "> 0" << std::endl;
+    x_map[0] += scale_x;
+    x_map[1] -= scale_x;
+    y_map[0] += scale_y;
+    y_map[1] -= scale_y;
+  }else if(yoffset < 0) {
+    std::cout << "< 0" << std::endl;
+    x_map[0] -= scale_x;
+    x_map[1] += scale_x;
+    y_map[0] -= scale_y;
+    y_map[1] += scale_y;
+  }
+
+  render_frame = true;
+}
+
 int main(int argc, char** argv) {
   if(!glfwInit()) {
     std::cout << "glfw is not so ok" << std::endl;
@@ -262,6 +284,7 @@ int main(int argc, char** argv) {
   glfwSetMouseButtonCallback(window, mouseClick);
   glfwSetCursorPosCallback(window, mouseMove);
   glfwSetKeyCallback(window, keyPressed);
+  glfwSetScrollCallback(window, scollInput);
 
   // those two vertices fill the whole window
   // where (0, 0) is in the middle of the screen
