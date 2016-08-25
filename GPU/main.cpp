@@ -59,6 +59,7 @@ struct Color {
 
 // store the last mouse position
 MousePosition last_mouse_position;
+MousePosition curr_mouse_position;
 bool get_last_mouse_pos = false;
 bool get_curr_mouse_pos = false;
 bool mouse_down = false;
@@ -100,6 +101,9 @@ void mouseClick(GLFWwindow* window, int button, int action, int mods) {
 
 // mouse move callback
 void mouseMove(GLFWwindow* window, double xpos, double ypos) {
+  curr_mouse_position.x = xpos;
+  curr_mouse_position.y = ypos;
+
   if(get_last_mouse_pos) {
     get_last_mouse_pos = false;
 
@@ -195,8 +199,8 @@ void keyPressed(GLFWwindow* window, int key, int scancode, int action, int mods)
   }
 
 
-  double scale_x = std::fabs(x_map[0] - x_map[1]) / 100;
-  double scale_y = std::fabs(y_map[0] - y_map[1]) / 100;
+  double scale_x = std::fabs(x_map[0] - x_map[1]) / 40;
+  double scale_y = std::fabs(y_map[0] - y_map[1]) / 40;
   switch(key) {
     case GLFW_KEY_UP:
       y_map[0] += scale_y;
@@ -229,18 +233,23 @@ void keyPressed(GLFWwindow* window, int key, int scancode, int action, int mods)
 }
 
 void scollInput(GLFWwindow* window, double xoffset, double yoffset) {
-  double scale_x = std::fabs(x_map[0] - x_map[1]) / 40;
-  double scale_y = std::fabs(y_map[0] - y_map[1]) / 40;
+  double left_scale = curr_mouse_position.x / WIDTH;
+  double right_scale = (WIDTH - curr_mouse_position.x) / WIDTH;
+  double up_scale = curr_mouse_position.y / HEIGHT;
+  double down_scale = (HEIGHT - curr_mouse_position.y) / HEIGHT;
+
+  double scale_x = std::fabs(x_map[0] - x_map[1]) / 20;
+  double scale_y = std::fabs(y_map[0] - y_map[1]) / 20;
   if(yoffset > 0) {
-    x_map[0] += scale_x;
-    x_map[1] -= scale_x;
-    y_map[0] += scale_y;
-    y_map[1] -= scale_y;
+    x_map[0] += scale_x * left_scale;
+    x_map[1] -= scale_x * right_scale;
+    y_map[0] += scale_y * down_scale;
+    y_map[1] -= scale_y * up_scale;
   }else if(yoffset < 0) {
-    x_map[0] -= scale_x;
-    x_map[1] += scale_x;
-    y_map[0] -= scale_y;
-    y_map[1] += scale_y;
+    x_map[0] -= scale_x * left_scale;
+    x_map[1] += scale_x * right_scale;
+    y_map[0] -= scale_y * down_scale;
+    y_map[1] += scale_y * up_scale;
   }
 
   render_frame = true;
